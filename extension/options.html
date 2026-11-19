@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>设置 - 本地明文密码管理器</title>
+  <link rel="stylesheet" href="page.css">
+</head>
+<body>
+<div class="wrap">
+  <h1>设置</h1>
+  <div class="subtitle">本地明文密码管理器 · 所有数据仅保存在你自己的硬盘上</div>
+
+  <div class="card risk-card">
+    <h2>⚠ 明文存储风险提示（永久展示）</h2>
+    <ul>
+      <li>账号密码以<b>完全明文</b>形式保存在 JSON 文件中，任何能读取该文件的程序或人员都能直接看到密码。</li>
+      <li>请勿将此文件放入网盘同步目录、共享文件夹或提交到 Git 仓库。</li>
+      <li>建议定期手动复制该文件做备份，并妥善保管备份。</li>
+      <li>本插件不会联网、不上传任何数据；但<b>本机其他软件不受本插件控制</b>。</li>
+      <li>如使用公共 / 共用电脑，请放弃使用明文方案，改用系统密钥环或正规密码管理器。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>本地服务</h2>
+    <div id="serviceStatus" class="status err">正在检测本地服务…</div>
+    <div class="row">
+      <div class="field">
+        <label for="optPort">监听端口</label>
+        <input id="optPort" class="input" type="number" min="1" max="65535" value="8765">
+      </div>
+      <div class="field">
+        <label for="optDataFile">password.json 完整路径</label>
+        <input id="optDataFile" class="input" type="text" placeholder="C:\Users\you\password.json">
+        <div class="desc">支持绝对路径；服务启动时会自检并在文件不存在时自动创建 <code>[]</code>。修改后点「保存服务配置」。</div>
+      </div>
+    </div>
+    <div class="switch-row">
+      <input id="optLogEnabled" type="checkbox">
+      <div>
+        <div class="label">记录读写日志</div>
+        <div class="desc">日志写入 local-service/server.log（仅记录操作类型与域名，不记录密码内容）。</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button id="btnSaveServer" class="btn btn-primary">保存服务配置</button>
+      <button id="btnTest" class="btn">测试连接</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>插件行为</h2>
+    <div class="switch-row">
+      <input id="optAutoFill" type="checkbox">
+      <div>
+        <div class="label">自动填充（默认关闭）</div>
+        <div class="desc">打开时，页面加载完成后自动用该域名的第一条凭证填充。出于安全考虑不推荐开启。</div>
+      </div>
+    </div>
+    <div class="switch-row">
+      <input id="optIncognito" type="checkbox">
+      <div>
+        <div class="label">允许在无痕窗口读取 / 保存（默认关闭）</div>
+        <div class="desc">无痕模式下浏览器与本机其他程序仍可能记录数据，强烈建议保持关闭。</div>
+      </div>
+    </div>
+    <div class="switch-row">
+      <input id="optClearClipboard" type="checkbox">
+      <div>
+        <div class="label">复制密码后 10 秒自动清空剪贴板</div>
+        <div class="desc">由后台服务延时执行，避免密码长期留在剪贴板中。</div>
+      </div>
+    </div>
+    <div class="switch-row">
+      <input id="optBackupReminder" type="checkbox">
+      <div>
+        <div class="label">显示备份提醒</div>
+        <div class="desc">在弹窗底部显示「定期备份 JSON 文件」提示。</div>
+      </div>
+    </div>
+    <div class="field" style="margin-top:14px">
+      <label for="optBlacklist">排除站点（黑名单）</label>
+      <textarea id="optBlacklist" class="textarea" placeholder="每行一个域名，例如：&#10;bank.example.com&#10;*.internal.company.com"></textarea>
+      <div class="desc">黑名单网站不自动填充、不参与快捷键填充。手动填充不受限制。</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button id="btnSavePrefs" class="btn btn-primary">保存偏好设置</button>
+      <button id="btnClearSelectors" class="btn btn-danger">清除所有手动框选记录</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>使用说明</h2>
+    <details open>
+      <summary>展开查看完整流程</summary>
+      <div>
+        <ol>
+          <li>双击运行 <code>local-service/start.bat</code>，看到「本地明文密码服务已启动」即正常（窗口不要关闭）。</li>
+          <li>Chrome 地址栏输入 <code>chrome://extensions</code>，打开「开发者模式」，点「加载已解压的扩展程序」，选择本项目的 <code>extension</code> 文件夹。</li>
+          <li>在登录页输入账号密码 → 点击插件图标 → 「读取表单」→ 填备注 → 「保存到硬盘」。</li>
+          <li>下次打开同一网站，点击插件图标 → 选择账号 → 「填充」→ 手动点网站登录按钮。</li>
+          <li>直接用记事本修改 <code>password.json</code> 后，回到插件弹窗点「刷新」即可生效。</li>
+          <li>快捷键：<code>Alt+Shift+P</code> 打开管理器，<code>Alt+Shift+F</code> 填充（多条账号时重复按可轮换）。可在 <code>chrome://extensions/shortcuts</code> 修改。</li>
+        </ol>
+      </div>
+    </details>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script src="options.js"></script>
+</body>
+</html>

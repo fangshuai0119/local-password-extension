@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>本地明文密码管理器</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="header">
+    <div class="brand">
+      <span class="brand-mark">钥</span>
+      <div>
+        <div class="brand-title">本地明文密码</div>
+        <div class="brand-sub">硬盘 JSON · 手动填充 · 不联网</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button id="btnManage" class="icon-btn" title="打开全部账号管理页">管理</button>
+      <button id="btnOptions" class="icon-btn" title="设置">⚙</button>
+    </div>
+  </header>
+
+  <div class="statusbar">
+    <span id="connDot" class="dot dot-gray"></span>
+    <span id="connText" class="conn-text">正在连接本地服务…</span>
+    <span id="domainText" class="domain-text" title="当前网站域名">—</span>
+  </div>
+
+  <div id="incognitoWarn" class="banner banner-warn hidden">
+    无痕窗口默认不读取 / 不保存凭证（可在设置中开启）
+  </div>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="site">当前网站</button>
+    <button class="tab" data-tab="all">全部账号</button>
+    <button class="tab" data-tab="gen">密码生成</button>
+  </nav>
+
+  <main class="content">
+    <!-- 当前网站 -->
+    <section id="panel-site" class="panel active">
+      <div class="toolbar">
+        <button id="btnReadForm" class="btn btn-sm" title="读取页面表单中的账号密码并新建凭证">读取表单</button>
+        <button id="btnManualSelect" class="btn btn-sm" title="在页面上手动指定账号框和密码框">手动框选</button>
+        <button id="btnRefresh" class="btn btn-sm" title="重新从硬盘 JSON 读取">刷新</button>
+      </div>
+      <div id="formHint" class="hint hidden"></div>
+      <div id="siteList" class="list"></div>
+      <button id="btnAddSite" class="btn btn-block btn-outline">+ 手动新增本网站凭证</button>
+    </section>
+
+    <!-- 全部账号 -->
+    <section id="panel-all" class="panel">
+      <div class="search-wrap">
+        <input id="globalSearch" class="input" type="search" placeholder="搜索域名 / 用户名 / 备注…" autocomplete="off">
+      </div>
+      <div id="allCount" class="count-text"></div>
+      <div id="allList" class="list"></div>
+    </section>
+
+    <!-- 密码生成器 -->
+    <section id="panel-gen" class="panel">
+      <div class="gen-box">
+        <label class="field-label">长度 <span id="lenValue" class="len-badge">16</span></label>
+        <input id="genLength" type="range" min="6" max="40" value="16" class="range">
+        <div class="check-grid">
+          <label><input id="genUpper" type="checkbox" checked> 大写 A-Z</label>
+          <label><input id="genLower" type="checkbox" checked> 小写 a-z</label>
+          <label><input id="genDigit" type="checkbox" checked> 数字 0-9</label>
+          <label><input id="genSymbol" type="checkbox" checked> 符号 !@#</label>
+        </div>
+        <button id="btnGenerate" class="btn btn-primary btn-block">生成密码</button>
+        <div class="gen-result-row">
+          <input id="genResult" class="input mono" type="text" readonly placeholder="点击上方按钮生成">
+          <button id="btnGenCopy" class="btn btn-sm" title="复制生成结果">复制</button>
+        </div>
+        <div class="gen-actions">
+          <button id="btnGenFill" class="btn btn-sm btn-outline">填入密码框</button>
+          <button id="btnGenSave" class="btn btn-sm btn-outline">保存到本网站</button>
+        </div>
+      </div>
+      <p class="tip-text">生成的密码仅存在于本页面内存，弹窗关闭即清空。</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-left">
+      <span class="risk-dot"></span>
+      <span>明文存储有风险，请定期备份 JSON 文件</span>
+    </div>
+    <button id="btnExport" class="link-btn" title="导出备份">导出备份</button>
+  </footer>
+
+  <!-- 编辑 / 新增弹层 -->
+  <div id="editor" class="modal hidden">
+    <div class="modal-mask" data-close="1"></div>
+    <div class="modal-body">
+      <div class="modal-head">
+        <strong id="editorTitle">新增凭证</strong>
+        <button id="editorClose" class="icon-btn" title="关闭">✕</button>
+      </div>
+      <div class="modal-fields">
+        <label class="field-label">网站域名</label>
+        <input id="fDomain" class="input" type="text" placeholder="https://example.com">
+        <label class="field-label">网站标题</label>
+        <input id="fTitle" class="input" type="text" placeholder="例如：GitHub">
+        <label class="field-label">用户名 / 账号</label>
+        <input id="fUsername" class="input" type="text" autocomplete="off">
+        <label class="field-label">密码</label>
+        <div class="pwd-row">
+          <input id="fPassword" class="input mono" type="password" autocomplete="new-password">
+          <button id="btnTogglePwd" class="btn btn-sm" title="显示/隐藏">👁</button>
+        </div>
+        <label class="field-label">备注</label>
+        <input id="fNote" class="input" type="text" placeholder="主账号 / 工作账号…">
+        <label class="field-label">登录链接（可选，登录页与域名不一致时填写）</label>
+        <input id="fLoginUrl" class="input" type="text" placeholder="https://example.com/login">
+        <label class="field-label">第二步验证码备注（可选）</label>
+        <input id="fTotp" class="input" type="text" placeholder="例如：验证器 App 密钥备注">
+      </div>
+      <div class="modal-foot">
+        <button id="editorCancel" class="btn">取消</button>
+        <button id="editorSave" class="btn btn-primary">保存到硬盘</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="api.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

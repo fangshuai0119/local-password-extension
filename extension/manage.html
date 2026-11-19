@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>全部凭证 - 本地明文密码管理器</title>
+  <link rel="stylesheet" href="page.css">
+</head>
+<body>
+<div class="wrap">
+  <h1>全部凭证</h1>
+  <div class="subtitle">硬盘 JSON 中的全部网站账号 · 修改后即时写回文件</div>
+
+  <div id="status" class="status err">正在连接本地服务…</div>
+
+  <div class="card">
+    <div class="toolbar">
+      <input id="search" class="input" type="search" placeholder="搜索域名 / 账号 / 备注 / 标题…" autocomplete="off">
+      <button id="btnRefresh" class="btn">刷新</button>
+      <button id="btnExport" class="btn">导出备份</button>
+      <button id="btnOptions" class="btn">设置</button>
+    </div>
+    <div id="count" class="subtitle" style="margin:0 0 8px"></div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:18%">网站</th>
+          <th style="width:20%">账号</th>
+          <th style="width:18%">备注 / 标题</th>
+          <th style="width:17%">登录链接 / 二步验证</th>
+          <th style="width:12%">保存时间</th>
+          <th style="width:15%">操作</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div id="empty" class="empty hidden">暂无凭证</div>
+  </div>
+
+  <div class="card">
+    <h2>导入 / 合并</h2>
+    <div class="import-box">
+      <input id="importFile" type="file" accept=".json,application/json">
+      <select id="importMode" class="select" style="width:auto">
+        <option value="merge">合并（域名+账号相同则覆盖）</option>
+        <option value="overwrite">覆盖（清空后用导入文件替换）</option>
+      </select>
+      <button id="btnImport" class="btn btn-primary">导入</button>
+    </div>
+    <div class="desc" style="font-size:11px;color:#94a3b8;margin-top:8px">导入前建议先「导出备份」。</div>
+  </div>
+</div>
+
+<div id="editor" class="modal hidden">
+  <div class="modal-mask" data-close="1"></div>
+  <div class="modal-body" style="width:480px">
+    <div class="modal-head" style="padding:14px 18px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center">
+      <strong id="editorTitle" style="font-size:16px">编辑凭证</strong>
+      <button id="editorClose" class="btn btn-sm">✕</button>
+    </div>
+    <div style="padding:16px 18px">
+      <div class="row">
+        <div class="field"><label>网站域名</label><input id="fDomain" class="input" type="text"></div>
+        <div class="field"><label>网站标题</label><input id="fTitle" class="input" type="text"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>用户名 / 账号</label><input id="fUsername" class="input" type="text"></div>
+        <div class="field"><label>密码</label><input id="fPassword" class="input" type="text"></div>
+      </div>
+      <div class="field"><label>备注</label><input id="fNote" class="input" type="text"></div>
+      <div class="row">
+        <div class="field"><label>登录链接</label><input id="fLoginUrl" class="input" type="text"></div>
+        <div class="field"><label>第二步验证码备注</label><input id="fTotp" class="input" type="text"></div>
+      </div>
+    </div>
+    <div style="padding:12px 18px;border-top:1px solid #e5e7eb;display:flex;justify-content:flex-end;gap:8px">
+      <button id="editorCancel" class="btn">取消</button>
+      <button id="editorSave" class="btn btn-primary">保存到硬盘</button>
+    </div>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script src="manage.js"></script>
+</body>
+</html>

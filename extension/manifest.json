@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "本地明文密码管理器",
+  "version": "1.0.0",
+  "description": "账号密码明文保存在本地硬盘 JSON 文件，手动触发填充，不联网、不上传。",
+  "minimum_chrome_version": "100",
+  "incognito": "spanning",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "clipboardWrite",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "http://127.0.0.1/*",
+    "http://localhost/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "本地明文密码管理器",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "options_page": "options.html",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["api.js", "content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "commands": {
+    "open-manager": {
+      "suggested_key": {
+        "default": "Alt+Shift+P"
+      },
+      "description": "打开密码管理器"
+    },
+    "fill-current": {
+      "suggested_key": {
+        "default": "Alt+Shift+F"
+      },
+      "description": "填充当前网站第一个账号"
+    }
+  }
+}
